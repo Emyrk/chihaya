@@ -70,19 +70,23 @@ func NewHook(cfg Config) (middleware.Hook, error) {
 func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceRequest, resp *bittorrent.AnnounceResponse) (context.Context, error) {
 	infohash := req.InfoHash
 
-	if len(h.approved) > 0 {
-		if _, found := h.approved[infohash]; !found {
-			return ctx, ErrInfohashUnapproved
-		}
-	}
-
+	// In blacklist
 	if len(h.unapproved) > 0 {
 		if _, found := h.unapproved[infohash]; found {
 			return ctx, ErrInfohashUnapproved
 		}
 	}
 
-	return ctx, nil
+	// In whitlist
+	if len(h.approved) > 0 {
+		if _, found := h.approved[infohash]; found {
+			fmt.Printf("Found in whitelist, accepting: %s\n", req.InfoHash[:])
+			return ctx, nil
+		}
+	}
+
+	fmt.Printf("Not found in whitelist, rejecting: %s\n", req.InfoHash[:])
+	return ctx, ErrInfohashUnapproved
 }
 
 func (h *hook) HandleScrape(ctx context.Context, req *bittorrent.ScrapeRequest, resp *bittorrent.ScrapeResponse) (context.Context, error) {
