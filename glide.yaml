@@ -1,0 +1,20 @@
+package: github.com/FactomProject/chihaya
+import:
+- package: github.com/Sirupsen/logrus
+- package: github.com/chihaya/chihaya
+  subpackages:
+  - bittorrent
+  - frontend/http
+  - frontend/udp
+  - middleware
+  - middleware/clientapproval
+  - middleware/jwt
+  - middleware/varinterval
+  - storage
+  - storage/memory
+- package: github.com/prometheus/client_golang
+  version: ~0.8.0
+  subpackages:
+  - prometheus
+- package: github.com/spf13/cobra
+- package: gopkg.in/yaml.v2
