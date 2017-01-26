@@ -108,10 +108,10 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 			if valid {
 				fmt.Printf("Added a new infohash to the whitelist: %x\n", b[:])
 				h.approved[infohash] = struct{}{}
+				break
 			}
 		}
 	}
-	fmt.Println(str)
 
 	// In blacklist
 	if len(h.unapproved) > 0 {
