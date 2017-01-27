@@ -1,5 +1,7 @@
 // Package infohashapproval implements a Hook that fails an Announce based on a
-// whitelist or blacklist of BitTorrent Infohashes.
+// whitelist or blacklist of BitTorrent Infohashes. To allow identities in the
+// authority add to the whitelist, they must sign their torrents, by using the
+// factomd-torrent
 
 package infohashapproval
 
@@ -7,11 +9,15 @@ import (
 	"context"
 	"encoding/hex"
 	"errors"
-	"fmt"
+	"log"
+	"os"
+	"os/user"
 
 	ed "github.com/FactomProject/ed25519"
 	"github.com/chihaya/chihaya/bittorrent"
 	"github.com/chihaya/chihaya/middleware"
+
+	"github.com/FactomProject/factomd/common/interfaces"
 )
 
 // Valid public keys
@@ -19,6 +25,10 @@ var (
 	publicKeys = []string{
 		"cc1985cdfae4e32b5a454dfda8ce5e1361558482684f3367649c3ad852c8e31a",
 	}
+
+	// DBPaths
+	ldbPath  string = "/.factom/m2/tracker-storage/infohash_ldb.db"
+	boltPath string = "/.factom/m2/tracker-storage/infohash_ldb.db"
 )
 
 // ErrInfohashUnapproved is the error returned when a infohash is invalid.
@@ -31,12 +41,15 @@ var ErrInvalidSignature = bittorrent.ClientError("Invalid Signature")
 type Config struct {
 	Whitelist []string `yaml:"whitelist"`
 	Blacklist []string `yaml:"blacklist"`
+	Database  string   `yaml:database"`
 }
 
 type hook struct {
 	approved   map[bittorrent.InfoHash]struct{}
 	unapproved map[bittorrent.InfoHash]struct{}
 }
+
+var MiddleWareDatabase interfaces.IDatabase
 
 // NewHook returns an instance of the infohash approval middleware.
 func NewHook(cfg Config) (middleware.Hook, error) {
@@ -45,6 +58,7 @@ func NewHook(cfg Config) (middleware.Hook, error) {
 		unapproved: make(map[bittorrent.InfoHash]struct{}),
 	}
 
+	// Load from Config. If loaded from config, it will not go into the database.
 	for _, ihString := range cfg.Whitelist {
 		ihBytes, err := hex.DecodeString(ihString)
 		if err != nil {
@@ -73,6 +87,48 @@ func NewHook(cfg Config) (middleware.Hook, error) {
 		h.unapproved[ih] = struct{}{}
 	}
 
+	switch cfg.Database {
+	case "Map":
+		log.Println("Infohash middleware is running without a database, and will not save")
+		MiddleWareDatabase = nil
+	case "Bolt":
+		db, err := NewOrOpenBoltDBWallet(GetHomeDir() + boltPath)
+		if err != nil {
+			panic("Failed to create a bolt database, " + err.Error())
+		}
+		MiddleWareDatabase = db
+
+	case "LDB":
+		db, err := NewOrOpenLevelDBWallet(GetHomeDir() + boltPath)
+		if err != nil {
+			panic("Failed to create a bolt database, " + err.Error())
+		}
+		MiddleWareDatabase = db
+	}
+
+	// Load from database and update our map
+	if MiddleWareDatabase != nil {
+		whitelist, err := MiddleWareDatabase.ListAllKeys([]byte("whitelist"))
+		if err != nil {
+			panic("Could not read database: " + err.Error())
+		}
+		for _, key := range whitelist {
+			var ih bittorrent.InfoHash
+			copy(ih[:], key[:])
+			h.approved[ih] = struct{}{}
+		}
+
+		blacklist, err := MiddleWareDatabase.ListAllKeys([]byte("blacklist"))
+		if err != nil {
+			panic("Could not read database: " + err.Error())
+		}
+		for _, key := range blacklist {
+			var ih bittorrent.InfoHash
+			copy(ih[:], key[:])
+			h.unapproved[ih] = struct{}{}
+		}
+	}
+
 	return h, nil
 }
 
@@ -85,7 +141,7 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 	str, exists := req.Params.String("sig")
 	_, whitlisted := h.approved[infohash]
 	// If already whitelisted, we do not care
-	if exists || !whitlisted {
+	if exists && !whitlisted {
 		// We have a signed infohash
 		signature, err := hex.DecodeString(str)
 		if err != nil || len(signature) != ed.SignatureSize {
@@ -106,8 +162,14 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 
 			valid := ed.VerifyCanonical(&pubKey, b[:], &sigFixed)
 			if valid {
-				fmt.Printf("Added a new infohash to the whitelist: %x\n", b[:])
 				h.approved[infohash] = struct{}{}
+				if MiddleWareDatabase != nil {
+					var t interfaces.BinaryMarshallable
+					err := MiddleWareDatabase.Put([]byte("whitelist"), b[:], t)
+					if err != nil {
+						log.Printf("Failed to write %x infohash to whitelist database: %s\n", b, err.Error())
+					}
+				}
 				break
 			}
 		}
@@ -116,7 +178,6 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 	// In blacklist
 	if len(h.unapproved) > 0 {
 		if _, found := h.unapproved[infohash]; found {
-			fmt.Printf("Found in blacklist, rejecting: %x\n", b[:])
 			return ctx, ErrInfohashUnapproved
 		}
 	}
@@ -124,16 +185,31 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 	// In whitlist
 	if len(h.approved) > 0 {
 		if _, found := h.approved[infohash]; found {
-			fmt.Printf("Found in whitelist, accepting: %x\n", b[:])
 			return ctx, nil
 		}
 	}
 
-	fmt.Printf("Not found in whitelist, rejecting: %x\n", b[:])
 	return ctx, ErrInfohashUnapproved
 }
 
 func (h *hook) HandleScrape(ctx context.Context, req *bittorrent.ScrapeRequest, resp *bittorrent.ScrapeResponse) (context.Context, error) {
 	// Scrapes don't require any protection.
 	return ctx, nil
+}
+
+func GetHomeDir() string {
+	// Get the OS specific home directory via the Go standard lib.
+	var homeDir string
+	usr, err := user.Current()
+	if err == nil {
+		homeDir = usr.HomeDir
+	}
+
+	// Fall back to standard HOME environment variable that works
+	// for most POSIX OSes if the directory from the Go standard
+	// lib failed.
+	if err != nil || homeDir == "" {
+		homeDir = os.Getenv("HOME")
+	}
+	return homeDir
 }

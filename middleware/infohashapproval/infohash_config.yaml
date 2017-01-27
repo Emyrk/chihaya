@@ -27,7 +27,6 @@ chihaya:
   prehooks:
   - name: infohash approval
     config:
+      database: Bolt
       whitelist:
-      - 0000000000000000000000000000000000000000
       blacklist:
-      - 0000000000000000000000000000000000000000
