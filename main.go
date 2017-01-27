@@ -8,7 +8,10 @@ import (
 	"runtime/pprof"
 	"syscall"
 
+	// Logging used by Chihaya, should keep
+	// to utilize their logging
 	log "github.com/Sirupsen/logrus"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/cobra"
 
