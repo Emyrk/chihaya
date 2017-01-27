@@ -173,7 +173,7 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 				h.approved[infohash] = struct{}{}
 				h.Unlock()
 				if MiddleWareDatabase != nil {
-					var t interfaces.BinaryMarshallable
+					t := new(EmptyStruct)
 					err := MiddleWareDatabase.Put([]byte("whitelist"), b[:], t)
 					if err != nil {
 						log.Printf("Failed to write %x infohash to whitelist database: %s\n", b, err.Error())
@@ -223,4 +223,19 @@ func GetHomeDir() string {
 		homeDir = os.Getenv("HOME")
 	}
 	return homeDir
+}
+
+type EmptyStruct struct {
+}
+
+func (e *EmptyStruct) MarshalBinary() ([]byte, error) {
+	return []byte{}, nil
+}
+
+func (e *EmptyStruct) UnmarshalBinary(data []byte) error {
+	return nil
+}
+
+func (e *EmptyStruct) UnmarshalBinaryData(data []byte) ([]byte, error) {
+	return data, nil
 }
