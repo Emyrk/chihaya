@@ -28,5 +28,7 @@ chihaya:
   - name: infohash approval
     config:
       database: Bolt
+      signers:
+        - "cc1985cdfae4e32b5a454dfda8ce5e1361558482684f3367649c3ad852c8e31a"
       whitelist:
       blacklist:

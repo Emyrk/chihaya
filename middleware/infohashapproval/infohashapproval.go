@@ -23,10 +23,6 @@ import (
 
 // Valid public keys
 var (
-	publicKeys = []string{
-		"cc1985cdfae4e32b5a454dfda8ce5e1361558482684f3367649c3ad852c8e31a",
-	}
-
 	// DBPaths
 	ldbPath  string = "/.factom/m2/tracker-storage/infohash_ldb.db"
 	boltPath string = "/.factom/m2/tracker-storage/infohash_ldb.db"
@@ -42,13 +38,15 @@ var ErrInvalidSignature = bittorrent.ClientError("Invalid Signature")
 type Config struct {
 	Whitelist []string `yaml:"whitelist"`
 	Blacklist []string `yaml:"blacklist"`
-	Database  string   `yaml:database"`
+	Database  string   `yaml:"database"`
+	Signers   []string `yaml:"signers"`
 }
 
 type hook struct {
 	approved   map[bittorrent.InfoHash]struct{}
 	unapproved map[bittorrent.InfoHash]struct{}
 
+	Signers []string
 	// We need 1 write opertation per infohash. The rest is reads,
 	// for that one moment, we will need to lock the map
 	sync.RWMutex
@@ -134,6 +132,8 @@ func NewHook(cfg Config) (middleware.Hook, error) {
 		}
 	}
 
+	h.Signers = cfg.Signers
+
 	return h, nil
 }
 
@@ -158,7 +158,7 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 		var sigFixed [ed.SignatureSize]byte
 		copy(sigFixed[:], signature[:])
 
-		for _, k := range publicKeys {
+		for _, k := range h.Signers {
 			key, err := hex.DecodeString(k)
 			if err != nil || len(key) != ed.PublicKeySize {
 				continue
