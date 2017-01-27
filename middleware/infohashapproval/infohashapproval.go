@@ -12,6 +12,7 @@ import (
 	"log"
 	"os"
 	"os/user"
+	"sync"
 
 	ed "github.com/FactomProject/ed25519"
 	"github.com/chihaya/chihaya/bittorrent"
@@ -47,6 +48,10 @@ type Config struct {
 type hook struct {
 	approved   map[bittorrent.InfoHash]struct{}
 	unapproved map[bittorrent.InfoHash]struct{}
+
+	// We need 1 write opertation per infohash. The rest is reads,
+	// for that one moment, we will need to lock the map
+	sync.RWMutex
 }
 
 var MiddleWareDatabase interfaces.IDatabase
@@ -139,7 +144,9 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 	copy(b[:], infohash[:])
 
 	str, exists := req.Params.String("sig")
+	h.RLock()
 	_, whitlisted := h.approved[infohash]
+	h.RUnlock()
 	// If already whitelisted, we do not care
 	if exists && !whitlisted {
 		// We have a signed infohash
@@ -162,7 +169,9 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 
 			valid := ed.VerifyCanonical(&pubKey, b[:], &sigFixed)
 			if valid {
+				h.Lock()
 				h.approved[infohash] = struct{}{}
+				h.Unlock()
 				if MiddleWareDatabase != nil {
 					var t interfaces.BinaryMarshallable
 					err := MiddleWareDatabase.Put([]byte("whitelist"), b[:], t)
@@ -175,6 +184,8 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 		}
 	}
 
+	h.RLock()
+	defer h.RUnlock()
 	// In blacklist
 	if len(h.unapproved) > 0 {
 		if _, found := h.unapproved[infohash]; found {
