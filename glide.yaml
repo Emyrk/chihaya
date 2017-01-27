@@ -1,5 +1,11 @@
 package: github.com/FactomProject/chihaya
 import:
+- package: github.com/FactomProject/ed25519
+- package: github.com/FactomProject/factomd
+  subpackages:
+  - common/interfaces
+  - database/hybridDB
+  - database/mapdb
 - package: github.com/Sirupsen/logrus
 - package: github.com/chihaya/chihaya
   subpackages:
@@ -7,9 +13,6 @@ import:
   - frontend/http
   - frontend/udp
   - middleware
-  - middleware/clientapproval
-  - middleware/jwt
-  - middleware/varinterval
   - storage
   - storage/memory
 - package: github.com/prometheus/client_golang

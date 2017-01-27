@@ -1,10 +1,14 @@
-hash: edb6016836c7704ce33e6dc5e20fbae9dfc945183008963834f03b43dbf360e1
-updated: 2017-01-26T15:46:08.765421573-06:00
+hash: 7764ecf4fb23a33c7d4283def6876ec964cafaffa51f2b15aece7c38901ebdea
+updated: 2017-01-27T13:21:29.195222803-06:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
   subpackages:
   - quantile
+- name: github.com/btcsuitereleases/btcutil
+  version: f2b1058a82554c0c7c3b8809c5956c38374604d8
+  subpackages:
+  - base58
 - name: github.com/chihaya/chihaya
   version: bfe970b12f15551e29eacdbe4cbcab052082bd31
   subpackages:
@@ -15,9 +19,6 @@ imports:
   - frontend/udp
   - frontend/udp/bytepool
   - middleware
-  - middleware/clientapproval
-  - middleware/jwt
-  - middleware/varinterval
   - pkg/stopper
   - storage
   - storage/memory
@@ -25,10 +26,57 @@ imports:
   version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
   subpackages:
   - spew
+- name: github.com/FactomProject/basen
+  version: fe3947df716ebfda9847eb1b9a48f9592e06478c
+- name: github.com/FactomProject/bolt
+  version: 7d662c5bb27d9defa01fa0563959594bb77ee62b
+- name: github.com/FactomProject/btcutil
+  version: 43986820ccd50b2b02b83e575cb3a39c87457482
+  subpackages:
+  - base58
+  - certs
+- name: github.com/FactomProject/btcutilecc
+  version: d3a63a5752ecf3fbc06bd97365da752111c263df
 - name: github.com/FactomProject/ed25519
   version: 38002c4fe7b609c2fa3144a3cc29b997b756bb4c
   subpackages:
   - edwards25519
+- name: github.com/FactomProject/factomd
+  version: d64a0f34aceecc21ec49095861a8db50d5eaecf2
+  subpackages:
+  - common/constants
+  - common/interfaces
+  - common/primitives
+  - common/primitives/random
+  - database/boltdb
+  - database/hybridDB
+  - database/leveldb
+  - database/mapdb
+  - log
+  - util
+- name: github.com/FactomProject/go-bip32
+  version: 3b593af1c415abc1017648e4eb24a88c32fee0f3
+- name: github.com/FactomProject/go-bip39
+  version: d1007fb78d9a7ec65314dad412973e63caf4c527
+- name: github.com/FactomProject/goleveldb
+  version: b882f9c7069c9730b1e7f8dd17250dabcaefa5ba
+  subpackages:
+  - leveldb
+  - leveldb/cache
+  - leveldb/comparer
+  - leveldb/errors
+  - leveldb/filter
+  - leveldb/iterator
+  - leveldb/journal
+  - leveldb/memdb
+  - leveldb/opt
+  - leveldb/storage
+  - leveldb/table
+  - leveldb/util
+- name: github.com/FactomProject/snappy-go
+  version: fff4c573c694b1e2d5c7a9b2b72dbe947b6a4c8e
+  subpackages:
+  - snappy
 - name: github.com/golang/protobuf
   version: 1f49d83d9aa00e6ce4fc8258c71cc7786aec968a
   subpackages:
@@ -74,10 +122,23 @@ imports:
   - require
 - name: github.com/tylerb/graceful
   version: 0e9129e9c6d47da90dc0c188b26bd7bb1dab53cd
+- name: golang.org/x/crypto
+  version: c3b1d0d6d8690eaebe3064711b026770cc37efa3
+  subpackages:
+  - pbkdf2
+  - ripemd160
 - name: golang.org/x/sys
-  version: a646d33e2ee3172a661fc09bca23bb4889a41bc8
+  version: d75a52659825e75fff6158388dddc6a5b04f9ba5
   subpackages:
   - unix
+- name: gopkg.in/gcfg.v1
+  version: 27e4946190b4a327b539185f2b5b1f7c84730728
+  subpackages:
+  - scanner
+  - token
+  - types
+- name: gopkg.in/warnings.v0
+  version: 8a331561fe74dadba6edfc59f3be66c22c3b065d
 - name: gopkg.in/yaml.v2
   version: e4d366fc3c7938e2958e662b4258c7a89e1f0e3e
 testImports: []
