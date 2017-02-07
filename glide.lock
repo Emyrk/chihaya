@@ -1,5 +1,5 @@
-hash: 7764ecf4fb23a33c7d4283def6876ec964cafaffa51f2b15aece7c38901ebdea
-updated: 2017-01-27T13:21:29.195222803-06:00
+hash: e76c61dad0d2db7d7755ed33514c9abe5b47174813e61635a653033bb968e9cd
+updated: 2017-02-07T13:32:04.588736043-06:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -121,7 +121,7 @@ imports:
   - assert
   - require
 - name: github.com/tylerb/graceful
-  version: 0e9129e9c6d47da90dc0c188b26bd7bb1dab53cd
+  version: 4654dfbb6ad53cb5e27f37d99b02e16c1872fbbb
 - name: golang.org/x/crypto
   version: c3b1d0d6d8690eaebe3064711b026770cc37efa3
   subpackages:
