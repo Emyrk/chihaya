@@ -9,7 +9,6 @@ import (
 	"context"
 	"encoding/hex"
 	"errors"
-	"log"
 	"os"
 	"os/user"
 	"sync"
@@ -19,6 +18,8 @@ import (
 	"github.com/chihaya/chihaya/middleware"
 
 	"github.com/FactomProject/factomd/common/interfaces"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 // Valid public keys
@@ -56,6 +57,7 @@ var MiddleWareDatabase interfaces.IDatabase
 
 // NewHook returns an instance of the infohash approval middleware.
 func NewHook(cfg Config) (middleware.Hook, error) {
+	InitPrometheus()
 	h := &hook{
 		approved:   make(map[bittorrent.InfoHash]struct{}),
 		unapproved: make(map[bittorrent.InfoHash]struct{}),
@@ -92,7 +94,7 @@ func NewHook(cfg Config) (middleware.Hook, error) {
 
 	switch cfg.Database {
 	case "Map":
-		log.Println("Infohash middleware is running without a database, and will not save")
+		log.Info("Infohash middleware is running without a database, and will not save")
 		MiddleWareDatabase = nil
 	case "Bolt":
 		db, err := NewOrOpenBoltDBWallet(GetHomeDir() + boltPath)
@@ -147,11 +149,14 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 	h.RLock()
 	_, whitlisted := h.approved[infohash]
 	h.RUnlock()
+	chihayaAnnounceCount.Add(1)
+	log.Infof("Announce recieved for infohash %x. Whitelisted: %t", b, whitlisted)
 	// If already whitelisted, we do not care
 	if exists && !whitlisted {
 		// We have a signed infohash
 		signature, err := hex.DecodeString(str)
 		if err != nil || len(signature) != ed.SignatureSize {
+			chihayaWhitelistFail.Add(1)
 			return ctx, ErrInvalidSignature
 		}
 
@@ -171,12 +176,15 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 			if valid {
 				h.Lock()
 				h.approved[infohash] = struct{}{}
+				chihayaWhitelistCount.Add(1)
+				log.Debugf("Infohash %x added to whitelist\n", b[:])
 				h.Unlock()
 				if MiddleWareDatabase != nil {
 					t := new(EmptyStruct)
 					err := MiddleWareDatabase.Put([]byte("whitelist"), b[:], t)
 					if err != nil {
-						log.Printf("Failed to write %x infohash to whitelist database: %s\n", b, err.Error())
+						chihayaWhitelistFail.Add(1)
+						log.Errorf("Failed to write %x infohash to whitelist database: %s\n", b, err.Error())
 					}
 				}
 				break
@@ -189,17 +197,20 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 	// In blacklist
 	if len(h.unapproved) > 0 {
 		if _, found := h.unapproved[infohash]; found {
+			chihayaAnnounceBlacklistCount.Add(1)
 			return ctx, ErrInfohashUnapproved
 		}
 	}
 
-	// In whitlist
+	// In whitelist
 	if len(h.approved) > 0 {
 		if _, found := h.approved[infohash]; found {
+			chihayaAnnounceWhitelistCount.Add(1)
 			return ctx, nil
 		}
 	}
 
+	chihayaAnnounceNolistCount.Add(1)
 	return ctx, ErrInfohashUnapproved
 }
 

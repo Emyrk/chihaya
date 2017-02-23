@@ -43,7 +43,7 @@ func NewOrOpenBoltDBWallet(boltPath string) (interfaces.IDatabase, error) {
 
 	// create the directory if it doesn't already exist
 	if os.IsNotExist(err) {
-		if err := os.MkdirAll(filepath.Dir(boltPath), 0700); err != nil {
+		if err := os.MkdirAll(filepath.Dir(boltPath), 0777); err != nil {
 			fmt.Printf("database error %s\n", err)
 		}
 	}
