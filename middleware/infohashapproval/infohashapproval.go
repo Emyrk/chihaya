@@ -150,7 +150,7 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 	_, whitlisted := h.approved[infohash]
 	h.RUnlock()
 	chihayaAnnounceCount.Add(1)
-	log.Infof("Announce recieved for infohash %x. Whitelisted: %t", b, whitlisted)
+	// log.Infof("Announce recieved for infohash %x. Whitelisted: %t", b, whitlisted)
 	// If already whitelisted, we do not care
 	if exists && !whitlisted {
 		// We have a signed infohash
@@ -177,7 +177,7 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 				h.Lock()
 				h.approved[infohash] = struct{}{}
 				chihayaWhitelistCount.Add(1)
-				log.Debugf("Infohash %x added to whitelist\n", b[:])
+				// log.Debugf("Infohash %x added to whitelist\n", b[:])
 				h.Unlock()
 				if MiddleWareDatabase != nil {
 					t := new(EmptyStruct)
@@ -216,6 +216,7 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 
 func (h *hook) HandleScrape(ctx context.Context, req *bittorrent.ScrapeRequest, resp *bittorrent.ScrapeResponse) (context.Context, error) {
 	// Scrapes don't require any protection.
+	chihayaScrapCount.Add(1)
 	return ctx, nil
 }
 
