@@ -1,5 +1,5 @@
-hash: ce925fd1e0f7078d70518e8d5db63cf363384f6ac2b89786ac1fd24eaa7ed287
-updated: 2017-02-08T09:01:19.125822641-05:00
+hash: 951c21144e2433ce3e7c1a43bc5bcd94b0619385359c4949fee5cf38b0f8a93c
+updated: 2017-03-03T15:07:43.837627923-03:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -10,7 +10,7 @@ imports:
   subpackages:
   - base58
 - name: github.com/chihaya/chihaya
-  version: 82d79e5113ebc4dec8198909d3421b4bd9416d38
+  version: ea1324602e5ee664edd7aeeb1994eacc25329eba
   subpackages:
   - bittorrent
   - frontend
@@ -23,17 +23,18 @@ imports:
   - storage
   - storage/memory
 - name: github.com/davecgh/go-spew
-  version: 04cdfd42973bb9c8589fd6a731800cf222fde1a9
+  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
   subpackages:
   - spew
 - name: github.com/FactomProject/basen
   version: fe3947df716ebfda9847eb1b9a48f9592e06478c
 - name: github.com/FactomProject/bolt
-  version: 7d662c5bb27d9defa01fa0563959594bb77ee62b
+  version: 952a1b4e9a55f458d536cf703bce25a4e9c99841
 - name: github.com/FactomProject/btcutil
   version: 43986820ccd50b2b02b83e575cb3a39c87457482
   subpackages:
   - base58
+  - certs
 - name: github.com/FactomProject/btcutilecc
   version: d3a63a5752ecf3fbc06bd97365da752111c263df
 - name: github.com/FactomProject/ed25519
@@ -41,11 +42,12 @@ imports:
   subpackages:
   - edwards25519
 - name: github.com/FactomProject/factomd
-  version: f15ba160f050c1ec86941f8f24efc0c8eebdffc1
+  version: 701f2cca5ed1f71771a36f8e0386f707106190fb
   subpackages:
   - common/constants
   - common/interfaces
   - common/primitives
+  - common/primitives/random
   - database/boltdb
   - database/hybridDB
   - database/leveldb
@@ -53,11 +55,11 @@ imports:
   - log
   - util
 - name: github.com/FactomProject/go-bip32
-  version: 58394f75c1d04ee30972d810015f491b9c7bee02
+  version: 3b593af1c415abc1017648e4eb24a88c32fee0f3
 - name: github.com/FactomProject/go-bip39
-  version: f0f3797c79f21408db076e5ca64f06848c040e04
+  version: d1007fb78d9a7ec65314dad412973e63caf4c527
 - name: github.com/FactomProject/goleveldb
-  version: b882f9c7069c9730b1e7f8dd17250dabcaefa5ba
+  version: 9d147f2b8f767adca2a29f9728658681081b03a8
   subpackages:
   - leveldb
   - leveldb/cache
@@ -72,11 +74,9 @@ imports:
   - leveldb/table
   - leveldb/util
 - name: github.com/FactomProject/snappy-go
-  version: fff4c573c694b1e2d5c7a9b2b72dbe947b6a4c8e
-  subpackages:
-  - snappy
+  version: f2f83b22c29e5abc60e3a95062ce1491d3b95371
 - name: github.com/golang/protobuf
-  version: 8ee79997227bf9b34611aee7946ae64735e6fd93
+  version: 69b215d01a5606c843240eab4937eab3acee6530
   subpackages:
   - proto
 - name: github.com/inconshreveable/mousetrap
@@ -98,38 +98,39 @@ imports:
   subpackages:
   - prometheus
 - name: github.com/prometheus/client_model
-  version: fa8ad6fec33561be4280a8f0514318c79d7f6cb6
+  version: 6f3806018612930941127f2a7c6c453ba2c527d2
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: dd2f054febf4a6c00f2343686efb775948a8bff4
+  version: 49fee292b27bfff7f354ee0f64e1bc4850462edf
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: 1878d9fbb537119d24b21ca07effd591627cd160
+  version: a1dba9ce8baed984a2495b658c82687f8157b98f
+  subpackages:
+  - xfs
+- name: github.com/sirupsen/logrus
+  version: d26492970760ca5d33129d2d799e34be5c4782eb
 - name: github.com/Sirupsen/logrus
-  version: 4b6ea7319e214d98c938f12692336f7ca9348d6b
-  repo: git@github.com:sirupsen/logrus.git
+  version: 0208149b40d863d2c1a2f8fe5753096a9cf2cc8b
 - name: github.com/spf13/cobra
-  version: 99600f6874c95daab762dc2373dc3ee1f6a48575
+  version: fcd0c5a1df88f5d6784cb4feead962c3f3d0b66c
 - name: github.com/spf13/pflag
   version: 9ff6c6923cfffbcd502984b8e0c80539a94968b7
 - name: github.com/stretchr/testify
-  version: 4d4bfba8f1d1027c4fdbe371823030df51419987
+  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   subpackages:
   - assert
   - require
-- name: github.com/tylerb/graceful
-  version: 4654dfbb6ad53cb5e27f37d99b02e16c1872fbbb
 - name: golang.org/x/crypto
-  version: 5f31782cfb2b6373211f8f9fbf31283fa234b570
+  version: 40541ccb1c6e64c947ed6f606b8a6cb4b67d7436
   subpackages:
   - pbkdf2
   - ripemd160
 - name: golang.org/x/sys
-  version: d75a52659825e75fff6158388dddc6a5b04f9ba5
+  version: e48874b42435b4347fc52bdee0424a52abc974d7
   subpackages:
   - unix
 - name: gopkg.in/gcfg.v1
@@ -141,5 +142,5 @@ imports:
 - name: gopkg.in/warnings.v0
   version: 8a331561fe74dadba6edfc59f3be66c22c3b065d
 - name: gopkg.in/yaml.v2
-  version: 4c78c975fe7c825c6d1466c42be594d1d6f3aba6
+  version: a3f3340b5840cee44f372bddb5880fcbc419b46a
 testImports: []

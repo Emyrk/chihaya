@@ -6,9 +6,8 @@ import:
   - common/interfaces
   - database/hybridDB
   - database/mapdb
-- package: github.com/Sirupsen/logrus
-  repo: git@github.com:sirupsen/logrus.git
-  version: ~0.10.0
+- package: github.com/sirupsen/logrus
+  version: v0.11.0
 - package: github.com/chihaya/chihaya
   subpackages:
   - bittorrent
