@@ -9,6 +9,7 @@ import:
 - package: github.com/sirupsen/logrus
   version: v0.11.0
 - package: github.com/chihaya/chihaya
+  version: bfe970b12f15551e29eacdbe4cbcab052082bd31
   subpackages:
   - bittorrent
   - frontend/http
