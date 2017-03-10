@@ -162,11 +162,9 @@ func (h *hook) Stop() <-chan error {
 }
 
 func (h *hook) writeToDatabase() {
-	var count int = 0
 	for {
 		select {
 		case ih := <-h.pendingWrites:
-			count++
 			h.Lock()
 			h.approved[ih] = struct{}{}
 			h.Unlock()
@@ -180,10 +178,6 @@ func (h *hook) writeToDatabase() {
 				if err != nil {
 					log.Printf("Failed to write %x infohash to whitelist database: %s\n", b, err.Error())
 				}
-			}
-			if count > 0 {
-				log.Printf("%d infohashes were written to the whitelist.", count)
-				count = 0
 			}
 		case <-h.closing:
 			log.Println("InfohashApproval Stopped")
