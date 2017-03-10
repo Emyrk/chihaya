@@ -61,9 +61,10 @@ type hook struct {
 func NewHook(cfg Config) (middleware.Hook, error) {
 	InitPrometheus()
 	h := &hook{
-		approved:   make(map[bittorrent.InfoHash]struct{}),
-		unapproved: make(map[bittorrent.InfoHash]struct{}),
-		closing:    make(chan struct{}),
+		approved:      make(map[bittorrent.InfoHash]struct{}),
+		unapproved:    make(map[bittorrent.InfoHash]struct{}),
+		pendingWrites: make(chan bittorrent.InfoHash, 25000),
+		closing:       make(chan struct{}),
 	}
 
 	// Load from Config. If loaded from config, it will not go into the database.
