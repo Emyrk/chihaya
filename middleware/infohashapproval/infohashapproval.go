@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/user"
 	"sync"
+	"time"
 
 	ed "github.com/FactomProject/ed25519"
 	"github.com/chihaya/chihaya/bittorrent"
@@ -46,13 +47,14 @@ type hook struct {
 	approved   map[bittorrent.InfoHash]struct{}
 	unapproved map[bittorrent.InfoHash]struct{}
 
+	pendingWrites      chan bittorrent.InfoHash // Pending saves to database
+	MiddleWareDatabase interfaces.IDatabase
+
 	Signers []string
 	// We need 1 write opertation per infohash. The rest is reads,
 	// for that one moment, we will need to lock the map
 	sync.RWMutex
 }
-
-var MiddleWareDatabase interfaces.IDatabase
 
 // NewHook returns an instance of the infohash approval middleware.
 func NewHook(cfg Config) (middleware.Hook, error) {
@@ -93,25 +95,27 @@ func NewHook(cfg Config) (middleware.Hook, error) {
 	switch cfg.Database {
 	case "Map":
 		log.Println("Infohash middleware is running without a database, and will not save")
-		MiddleWareDatabase = nil
+		h.MiddleWareDatabase = nil
 	case "Bolt":
 		db, err := NewOrOpenBoltDBWallet(GetHomeDir() + boltPath)
 		if err != nil {
 			panic("Failed to create a bolt database, " + err.Error())
 		}
-		MiddleWareDatabase = db
+		h.MiddleWareDatabase = db
 
 	case "LDB":
 		db, err := NewOrOpenLevelDBWallet(GetHomeDir() + boltPath)
 		if err != nil {
 			panic("Failed to create a bolt database, " + err.Error())
 		}
-		MiddleWareDatabase = db
+		h.MiddleWareDatabase = db
 	}
 
+	go h.writeToDatabase()
+
 	// Load from database and update our map
-	if MiddleWareDatabase != nil {
-		whitelist, err := MiddleWareDatabase.ListAllKeys([]byte("whitelist"))
+	if h.MiddleWareDatabase != nil {
+		whitelist, err := h.MiddleWareDatabase.ListAllKeys([]byte("whitelist"))
 		if err != nil {
 			panic("Could not read database: " + err.Error())
 		}
@@ -121,7 +125,7 @@ func NewHook(cfg Config) (middleware.Hook, error) {
 			h.approved[ih] = struct{}{}
 		}
 
-		blacklist, err := MiddleWareDatabase.ListAllKeys([]byte("blacklist"))
+		blacklist, err := h.MiddleWareDatabase.ListAllKeys([]byte("blacklist"))
 		if err != nil {
 			panic("Could not read database: " + err.Error())
 		}
@@ -137,18 +141,48 @@ func NewHook(cfg Config) (middleware.Hook, error) {
 	return h, nil
 }
 
+func (h *hook) writeToDatabase() {
+	var count int = 0
+	for {
+		select {
+		case ih := <-h.pendingWrites:
+			count++
+			h.Lock()
+			h.approved[ih] = struct{}{}
+			h.Unlock()
+
+			if h.MiddleWareDatabase != nil {
+				var b [20]byte
+				copy(b[:], ih[:])
+
+				t := new(EmptyStruct)
+				err := h.MiddleWareDatabase.Put([]byte("whitelist"), b[:], t)
+				if err != nil {
+					log.Printf("Failed to write %x infohash to whitelist database: %s\n", b, err.Error())
+				}
+			}
+		default:
+			if count > 0 {
+				log.Printf("%d infohashes were written to the whitelist.", count)
+				count = 0
+			}
+			time.Sleep(30 * time.Second)
+		}
+	}
+}
+
 func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceRequest, resp *bittorrent.AnnounceResponse) (context.Context, error) {
 	infohash := req.InfoHash
 
 	var b [20]byte
 	copy(b[:], infohash[:])
 
-	str, exists := req.Params.String("sig")
+	str, sigExists := req.Params.String("sig")
 	h.RLock()
 	_, whitlisted := h.approved[infohash]
 	h.RUnlock()
 	// If already whitelisted, we do not care
-	if exists && !whitlisted {
+	if sigExists && !whitlisted {
 		// We have a signed infohash
 		signature, err := hex.DecodeString(str)
 		if err != nil || len(signature) != ed.SignatureSize {
@@ -169,16 +203,12 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 
 			valid := ed.VerifyCanonical(&pubKey, b[:], &sigFixed)
 			if valid {
-				h.Lock()
+				/*h.Lock()
 				h.approved[infohash] = struct{}{}
-				h.Unlock()
-				if MiddleWareDatabase != nil {
-					t := new(EmptyStruct)
-					err := MiddleWareDatabase.Put([]byte("whitelist"), b[:], t)
-					if err != nil {
-						log.Printf("Failed to write %x infohash to whitelist database: %s\n", b, err.Error())
-					}
-				}
+				h.Unlock()*/
+
+				h.pendingWrites <- infohash
+
 				break
 			}
 		}
