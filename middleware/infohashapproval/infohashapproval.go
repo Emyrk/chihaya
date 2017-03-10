@@ -13,11 +13,11 @@ import (
 	"os"
 	"os/user"
 	"sync"
-	"time"
 
 	ed "github.com/FactomProject/ed25519"
 	"github.com/chihaya/chihaya/bittorrent"
 	"github.com/chihaya/chihaya/middleware"
+	"github.com/chihaya/chihaya/pkg/stopper"
 
 	"github.com/FactomProject/factomd/common/interfaces"
 )
@@ -49,6 +49,7 @@ type hook struct {
 
 	pendingWrites      chan bittorrent.InfoHash // Pending saves to database
 	MiddleWareDatabase interfaces.IDatabase
+	closing            chan struct{}
 
 	Signers []string
 	// We need 1 write opertation per infohash. The rest is reads,
@@ -62,6 +63,7 @@ func NewHook(cfg Config) (middleware.Hook, error) {
 	h := &hook{
 		approved:   make(map[bittorrent.InfoHash]struct{}),
 		unapproved: make(map[bittorrent.InfoHash]struct{}),
+		closing:    make(chan struct{}),
 	}
 
 	// Load from Config. If loaded from config, it will not go into the database.
@@ -142,6 +144,22 @@ func NewHook(cfg Config) (middleware.Hook, error) {
 	return h, nil
 }
 
+func (h *hook) Stop() <-chan error {
+	log.Println("Attempting to shutdown InfohashApproval middleware")
+	select {
+	case <-h.closing:
+		return stopper.AlreadyStopped
+	default:
+	}
+	c := make(chan error)
+	go func() {
+		h.closing <- struct{}{}
+		//close(h.closing)
+		close(c)
+	}()
+	return c
+}
+
 func (h *hook) writeToDatabase() {
 	var count int = 0
 	for {
@@ -162,12 +180,13 @@ func (h *hook) writeToDatabase() {
 					log.Printf("Failed to write %x infohash to whitelist database: %s\n", b, err.Error())
 				}
 			}
-		default:
 			if count > 0 {
 				log.Printf("%d infohashes were written to the whitelist.", count)
 				count = 0
 			}
-			time.Sleep(30 * time.Second)
+		case <-h.closing:
+			log.Println("InfohashApproval Stopped")
+			return
 		}
 	}
 }
