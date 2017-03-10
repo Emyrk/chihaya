@@ -1,6 +1,6 @@
 chihaya:
   announce_interval: 15m
-  prometheus_addr: localhost:6880
+  prometheus_addr: localhost:6882
   max_numwant: 50
   default_numwant: 25
 

@@ -1,5 +1,5 @@
-hash: e76c61dad0d2db7d7755ed33514c9abe5b47174813e61635a653033bb968e9cd
-updated: 2017-02-07T13:32:04.588736043-06:00
+hash: c5fa28ec271a03f5612e70cf685bd507647dc07eb6315e31705edd54e4150deb
+updated: 2017-03-03T12:52:52.943184774-06:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -29,7 +29,7 @@ imports:
 - name: github.com/FactomProject/basen
   version: fe3947df716ebfda9847eb1b9a48f9592e06478c
 - name: github.com/FactomProject/bolt
-  version: 7d662c5bb27d9defa01fa0563959594bb77ee62b
+  version: 952a1b4e9a55f458d536cf703bce25a4e9c99841
 - name: github.com/FactomProject/btcutil
   version: 43986820ccd50b2b02b83e575cb3a39c87457482
   subpackages:
@@ -42,7 +42,7 @@ imports:
   subpackages:
   - edwards25519
 - name: github.com/FactomProject/factomd
-  version: d64a0f34aceecc21ec49095861a8db50d5eaecf2
+  version: 9535d2788a5ac60055e3023a302f9d61322d32e9
   subpackages:
   - common/constants
   - common/interfaces
@@ -59,7 +59,7 @@ imports:
 - name: github.com/FactomProject/go-bip39
   version: d1007fb78d9a7ec65314dad412973e63caf4c527
 - name: github.com/FactomProject/goleveldb
-  version: b882f9c7069c9730b1e7f8dd17250dabcaefa5ba
+  version: 9d147f2b8f767adca2a29f9728658681081b03a8
   subpackages:
   - leveldb
   - leveldb/cache
@@ -74,9 +74,7 @@ imports:
   - leveldb/table
   - leveldb/util
 - name: github.com/FactomProject/snappy-go
-  version: fff4c573c694b1e2d5c7a9b2b72dbe947b6a4c8e
-  subpackages:
-  - snappy
+  version: f2f83b22c29e5abc60e3a95062ce1491d3b95371
 - name: github.com/golang/protobuf
   version: 1f49d83d9aa00e6ce4fc8258c71cc7786aec968a
   subpackages:
@@ -109,12 +107,14 @@ imports:
   - model
 - name: github.com/prometheus/procfs
   version: abf152e5f3e97f2fafac028d2cc06c1feb87ffa5
+- name: github.com/sirupsen/logrus
+  version: d26492970760ca5d33129d2d799e34be5c4782eb
 - name: github.com/Sirupsen/logrus
-  version: 4b6ea7319e214d98c938f12692336f7ca9348d6b
+  version: 0208149b40d863d2c1a2f8fe5753096a9cf2cc8b
 - name: github.com/spf13/cobra
-  version: 9c28e4bbd74e5c3ed7aacbc552b2cab7cfdfe744
+  version: fcd0c5a1df88f5d6784cb4feead962c3f3d0b66c
 - name: github.com/spf13/pflag
-  version: 103ce5cd2042f2fe629c1957abb64ab3e7f50235
+  version: 9ff6c6923cfffbcd502984b8e0c80539a94968b7
 - name: github.com/stretchr/testify
   version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   subpackages:
@@ -123,12 +123,12 @@ imports:
 - name: github.com/tylerb/graceful
   version: 4654dfbb6ad53cb5e27f37d99b02e16c1872fbbb
 - name: golang.org/x/crypto
-  version: c3b1d0d6d8690eaebe3064711b026770cc37efa3
+  version: bed12803fa9663d7aa2c2346b0c634ad2dcd43b7
   subpackages:
   - pbkdf2
   - ripemd160
 - name: golang.org/x/sys
-  version: d75a52659825e75fff6158388dddc6a5b04f9ba5
+  version: 7a6e5648d140666db5d920909e082ca00a87ba2c
   subpackages:
   - unix
 - name: gopkg.in/gcfg.v1

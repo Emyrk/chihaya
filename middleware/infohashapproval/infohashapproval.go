@@ -58,6 +58,7 @@ type hook struct {
 
 // NewHook returns an instance of the infohash approval middleware.
 func NewHook(cfg Config) (middleware.Hook, error) {
+	InitPrometheus()
 	h := &hook{
 		approved:   make(map[bittorrent.InfoHash]struct{}),
 		unapproved: make(map[bittorrent.InfoHash]struct{}),
@@ -181,11 +182,14 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 	h.RLock()
 	_, whitlisted := h.approved[infohash]
 	h.RUnlock()
+	chihayaAnnounceCount.Add(1)
+	// log.Infof("Announce recieved for infohash %x. Whitelisted: %t", b, whitlisted)
 	// If already whitelisted, we do not care
 	if sigExists && !whitlisted {
 		// We have a signed infohash
 		signature, err := hex.DecodeString(str)
 		if err != nil || len(signature) != ed.SignatureSize {
+			chihayaWhitelistFail.Add(1)
 			return ctx, ErrInvalidSignature
 		}
 
@@ -219,22 +223,26 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 	// In blacklist
 	if len(h.unapproved) > 0 {
 		if _, found := h.unapproved[infohash]; found {
+			chihayaAnnounceBlacklistCount.Add(1)
 			return ctx, ErrInfohashUnapproved
 		}
 	}
 
-	// In whitlist
+	// In whitelist
 	if len(h.approved) > 0 {
 		if _, found := h.approved[infohash]; found {
+			chihayaAnnounceWhitelistCount.Add(1)
 			return ctx, nil
 		}
 	}
 
+	chihayaAnnounceNolistCount.Add(1)
 	return ctx, ErrInfohashUnapproved
 }
 
 func (h *hook) HandleScrape(ctx context.Context, req *bittorrent.ScrapeRequest, resp *bittorrent.ScrapeResponse) (context.Context, error) {
 	// Scrapes don't require any protection.
+	chihayaScrapCount.Add(1)
 	return ctx, nil
 }
 
