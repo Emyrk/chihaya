@@ -26,6 +26,12 @@ var (
 		Name: "chihaya_middleware_nolist_announce_total_count",
 		Help: "Amount of announces the middleware recieves that are in no list",
 	})
+
+	chihayaAnnounceResponseTime = prometheus.NewSummary(prometheus.SummaryOpts{
+		Name: "chihaya_middleware_announce_time_summary_ns",
+		Help: "Announce request times",
+	})
+
 	//		Scrape
 	chihayaScrapCount = prometheus.NewCounter(prometheus.CounterOpts{
 		Name: "chihaya_middleware_scrape_count",
@@ -51,6 +57,7 @@ func InitPrometheus() {
 	prometheus.MustRegister(chihayaAnnounceBlacklistCount)
 	prometheus.MustRegister(chihayaAnnounceNolistCount)
 	prometheus.MustRegister(chihayaScrapCount)
+	prometheus.MustRegister(chihayaAnnounceResponseTime)
 
 	// Storage
 	prometheus.MustRegister(chihayaWhitelistCount)

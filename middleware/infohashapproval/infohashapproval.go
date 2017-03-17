@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/user"
 	"sync"
+	"time"
 
 	ed "github.com/FactomProject/ed25519"
 	"github.com/chihaya/chihaya/bittorrent"
@@ -25,13 +26,14 @@ import (
 // Valid public keys
 var (
 	// DBPaths
-	ldbPath  string = "/.factom/m2/tracker-storage/infohash_ldb.db"
-	boltPath string = "/.factom/m2/tracker-storage/infohash_ldb.db"
+	ldbPath  = "/.factom/m2/tracker-storage/infohash_ldb.db"
+	boltPath = "/.factom/m2/tracker-storage/infohash_ldb.db"
 )
 
 // ErrInfohashUnapproved is the error returned when a infohash is invalid.
 var ErrInfohashUnapproved = bittorrent.ClientError("unapproved infohash")
 
+// ErrInvalidSignature is the error is the signature is invalid
 var ErrInvalidSignature = bittorrent.ClientError("Invalid Signature")
 
 // Config represents all the values required by this middleware to validate
@@ -187,6 +189,8 @@ func (h *hook) writeToDatabase() {
 }
 
 func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceRequest, resp *bittorrent.AnnounceResponse) (context.Context, error) {
+	start := time.Now().UnixNano()
+	defer chihayaAnnounceResponseTime.Observe(float64(time.Now().UnixNano()-start) / 1e9)
 	infohash := req.InfoHash
 
 	var b [20]byte
@@ -277,6 +281,7 @@ func GetHomeDir() string {
 	return homeDir
 }
 
+// EmptyStruct just an empty struct to work with the database.
 type EmptyStruct struct {
 }
 
