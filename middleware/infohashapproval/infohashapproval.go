@@ -103,14 +103,14 @@ func NewHook(cfg Config) (middleware.Hook, error) {
 		log.Println("Infohash middleware is running without a database, and will not save")
 		h.MiddleWareDatabase = nil
 	case "Bolt":
-		db, err := NewOrOpenBoltDBWallet(GetHomeDir() + boltPath)
+		db, err := NewOrOpenBoltDB(GetHomeDir() + boltPath)
 		if err != nil {
 			panic("Failed to create a bolt database, " + err.Error())
 		}
 		h.MiddleWareDatabase = db
 
 	case "LDB":
-		db, err := NewOrOpenLevelDBWallet(GetHomeDir() + boltPath)
+		db, err := NewOrOpenLevelDB(GetHomeDir() + boltPath)
 		if err != nil {
 			panic("Failed to create a bolt database, " + err.Error())
 		}

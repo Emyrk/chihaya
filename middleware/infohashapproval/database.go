@@ -10,7 +10,7 @@ import (
 	"github.com/FactomProject/factomd/database/mapdb"
 )
 
-func NewOrOpenLevelDBWallet(ldbpath string) (interfaces.IDatabase, error) {
+func NewOrOpenLevelDB(ldbpath string) (interfaces.IDatabase, error) {
 	db, err := hybridDB.NewLevelMapHybridDB(ldbpath, false)
 	if err != nil {
 		fmt.Printf("err opening db: %v\n", err)
@@ -32,7 +32,7 @@ func NewMapDB() (interfaces.IDatabase, error) {
 	return new(mapdb.MapDB), nil
 }
 
-func NewOrOpenBoltDBWallet(boltPath string) (interfaces.IDatabase, error) {
+func NewOrOpenBoltDB(boltPath string) (interfaces.IDatabase, error) {
 	// check if the file exists or if it is a directory
 	fileInfo, err := os.Stat(boltPath)
 	if err == nil {
