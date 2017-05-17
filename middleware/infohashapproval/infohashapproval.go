@@ -234,6 +234,7 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 				h.approved[infohash] = struct{}{}
 				h.Unlock()*/
 
+				chihayaWhitelistCount.Inc()
 				h.pendingWrites <- infohash
 				added = true
 				break
