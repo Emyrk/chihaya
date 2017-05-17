@@ -9,6 +9,7 @@ import (
 	"context"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"os/user"
@@ -143,6 +144,9 @@ func NewHook(cfg Config) (middleware.Hook, error) {
 	}
 
 	h.Signers = cfg.Signers
+	for _, s := range cfg.Signers {
+		fmt.Println("Signer:", s)
+	}
 
 	return h, nil
 }
