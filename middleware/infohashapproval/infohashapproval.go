@@ -207,13 +207,14 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 		// We have a signed infohash
 		signature, err := hex.DecodeString(str)
 		if err != nil || len(signature) != ed.SignatureSize {
-			chihayaWhitelistFail.Add(1)
+			chihayaWhitelistFail.Inc()
 			return ctx, ErrInvalidSignature
 		}
 
 		var sigFixed [ed.SignatureSize]byte
 		copy(sigFixed[:], signature[:])
 
+		added := false
 		for _, k := range h.Signers {
 			key, err := hex.DecodeString(k)
 			if err != nil || len(key) != ed.PublicKeySize {
@@ -230,9 +231,12 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 				h.Unlock()*/
 
 				h.pendingWrites <- infohash
-
+				added = true
 				break
 			}
+		}
+		if !added {
+			chihayaWhitelistFail.Inc()
 		}
 	}
 
