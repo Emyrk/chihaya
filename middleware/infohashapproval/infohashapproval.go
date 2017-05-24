@@ -129,6 +129,7 @@ func NewHook(cfg Config) (middleware.Hook, error) {
 			var ih bittorrent.InfoHash
 			copy(ih[:], key[:])
 			h.approved[ih] = struct{}{}
+			chihayaWhitelistCount.Inc()
 		}
 
 		blacklist, err := h.MiddleWareDatabase.ListAllKeys([]byte("blacklist"))
@@ -170,6 +171,7 @@ func (h *hook) writeToDatabase() {
 			h.Lock()
 			h.approved[ih] = struct{}{}
 			h.Unlock()
+			chihayaWhitelistCount.Inc()
 
 			if h.MiddleWareDatabase != nil {
 				var b [20]byte
