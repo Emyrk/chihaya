@@ -199,6 +199,9 @@ func (h *hook) HandleAnnounce(ctx context.Context, req *bittorrent.AnnounceReque
 	defer chihayaAnnounceResponseTime.Observe(float64(time.Now().UnixNano()-start) / 1e9)
 	infohash := req.InfoHash
 
+	log.Printf("Announce: %v", req)
+	log.Printf("Params: %v", req.Params)
+
 	var b [20]byte
 	copy(b[:], infohash[:])
 
