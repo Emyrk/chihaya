@@ -1,5 +1,5 @@
-hash: c5fa28ec271a03f5612e70cf685bd507647dc07eb6315e31705edd54e4150deb
-updated: 2017-03-03T12:52:52.943184774-06:00
+hash: 74b24dadcdc8bdf7ff73781f85f94169a59b20f09d6bb92af0fac1dc25d0d4c4
+updated: 2017-07-03T15:38:20.980041966-05:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -10,7 +10,8 @@ imports:
   subpackages:
   - base58
 - name: github.com/chihaya/chihaya
-  version: bfe970b12f15551e29eacdbe4cbcab052082bd31
+  version: 95cbed07d172869ff4ebf8c7f23dfc84d9955c7c
+  repo: https://github.com/FactomProject/chihaya-tracker.git
   subpackages:
   - bittorrent
   - frontend
@@ -19,9 +20,15 @@ imports:
   - frontend/udp
   - frontend/udp/bytepool
   - middleware
-  - pkg/stopper
+  - middleware/clientapproval
+  - middleware/jwt
+  - middleware/varinterval
+  - pkg/prand
+  - pkg/prometheus
+  - pkg/stop
   - storage
   - storage/memory
+  - storage/memorybysubnet
 - name: github.com/davecgh/go-spew
   version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
   subpackages:
@@ -59,7 +66,7 @@ imports:
 - name: github.com/FactomProject/go-bip39
   version: d1007fb78d9a7ec65314dad412973e63caf4c527
 - name: github.com/FactomProject/goleveldb
-  version: 9d147f2b8f767adca2a29f9728658681081b03a8
+  version: e7800c6976c5d75f0a9c5e9e0e2ff8086940e58f
   subpackages:
   - leveldb
   - leveldb/cache
@@ -87,6 +94,10 @@ imports:
   version: c12348ce28de40eed0136aa2b644d0ee0650e56c
   subpackages:
   - pbutil
+- name: github.com/mendsley/gojwk
+  version: 4d5ec6e58103388d6cb0d7d72bc72649be4f0504
+- name: github.com/minio/sha256-simd
+  version: f3ec2e4d36d43c3a899ed4b7d9f62188edcf5afd
 - name: github.com/pmezard/go-difflib
   version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
   subpackages:
@@ -107,10 +118,14 @@ imports:
   - model
 - name: github.com/prometheus/procfs
   version: abf152e5f3e97f2fafac028d2cc06c1feb87ffa5
+- name: github.com/SermoDigital/jose
+  version: f6df55f235c24f236d11dbcf665249a59ac2021f
+  subpackages:
+  - crypto
+  - jws
+  - jwt
 - name: github.com/sirupsen/logrus
   version: d26492970760ca5d33129d2d799e34be5c4782eb
-- name: github.com/Sirupsen/logrus
-  version: 0208149b40d863d2c1a2f8fe5753096a9cf2cc8b
 - name: github.com/spf13/cobra
   version: fcd0c5a1df88f5d6784cb4feead962c3f3d0b66c
 - name: github.com/spf13/pflag
@@ -120,8 +135,6 @@ imports:
   subpackages:
   - assert
   - require
-- name: github.com/tylerb/graceful
-  version: 4654dfbb6ad53cb5e27f37d99b02e16c1872fbbb
 - name: golang.org/x/crypto
   version: bed12803fa9663d7aa2c2346b0c634ad2dcd43b7
   subpackages:

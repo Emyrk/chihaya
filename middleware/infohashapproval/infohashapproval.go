@@ -19,7 +19,7 @@ import (
 	ed "github.com/FactomProject/ed25519"
 	"github.com/chihaya/chihaya/bittorrent"
 	"github.com/chihaya/chihaya/middleware"
-	"github.com/chihaya/chihaya/pkg/stopper"
+	"github.com/chihaya/chihaya/pkg/stop"
 
 	"github.com/FactomProject/factomd/common/interfaces"
 )
@@ -156,7 +156,7 @@ func (h *hook) Stop() <-chan error {
 	log.Println("Attempting to shutdown InfohashApproval middleware")
 	select {
 	case <-h.closing:
-		return stopper.AlreadyStopped
+		return stop.AlreadyStopped
 	default:
 	}
 	c := make(chan error)
