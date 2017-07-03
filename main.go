@@ -23,7 +23,7 @@ import (
 )
 
 func rootCmdRun(cmd *cobra.Command, args []string) error {
-	log.Info("[v0.1.0.0] Factom Chihaya Tracker")
+	log.Info("[v0.1.0.1] Factom Chihaya Tracker")
 	debugLog, _ := cmd.Flags().GetBool("debug")
 	log.SetLevel(log.DebugLevel)
 	log.Debugln("debug logging enabled")
