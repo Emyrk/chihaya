@@ -7,9 +7,10 @@ import:
   - database/hybridDB
   - database/mapdb
 - package: github.com/sirupsen/logrus
-  version: v0.11.0
+  version: v0.11.5
 - package: github.com/chihaya/chihaya
-  version: bfe970b12f15551e29eacdbe4cbcab052082bd31
+  version: 95cbed07d172869ff4ebf8c7f23dfc84d9955c7c
+  repo: https://github.com/FactomProject/chihaya-tracker.git
   subpackages:
   - bittorrent
   - frontend/http
